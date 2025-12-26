@@ -36,9 +36,20 @@ const CategoryEditor: React.FC<CategoryEditorProps> = ({
   const handleSave = () => {
     const lines = text.split('\n')
       .map(line => line.trim())
-      .filter(line => line.length > 0);
-    // Remove duplicates
-    const unique = Array.from(new Set(lines));
+      .filter(line => line.length > 0)
+      // Sanitize category names
+      .map(line => line.replace(/[<>:"\/\\|?*\x00-\x1F]/g, ''))
+      .filter(line => line.length > 0); // Remove empty after sanitization
+    
+    // Remove duplicates (case-insensitive)
+    const unique = Array.from(new Set(lines.map(l => l.toLowerCase())))
+      .map(lower => lines.find(l => l.toLowerCase() === lower)!);
+    
+    if (unique.length === 0) {
+      alert('Please add at least one category');
+      return;
+    }
+    
     onSave(unique);
     onClose();
   };

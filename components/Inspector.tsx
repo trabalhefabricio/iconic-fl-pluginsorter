@@ -115,7 +115,15 @@ const Inspector: React.FC<InspectorProps> = ({ selectedPlugins, settings, update
 
   const handleRenameSubmit = () => {
     if (selectedPlugins.length === 1 && renameValue.trim()) {
-        onUpdatePlugin(selectedPlugins[0].id, { name: renameValue.trim() });
+        // Sanitize plugin name: remove characters that are invalid in filenames
+        const cleanName = renameValue.trim().replace(/[<>:"\/\\|?*\x00-\x1F]/g, '');
+        
+        if (cleanName === '') {
+            alert('Invalid plugin name: contains only special characters');
+            return;
+        }
+        
+        onUpdatePlugin(selectedPlugins[0].id, { name: cleanName });
         setIsRenaming(false);
     }
   };

@@ -18,9 +18,20 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
         const dirHandle = await (window as any).showDirectoryPicker({
             mode: 'readwrite'
         });
-        await onStart(dirHandle, apiKey.trim());
+        // Validate API key format if provided
+        const trimmedKey = apiKey.trim();
+        if (trimmedKey && !isManual) {
+          // Basic validation: Gemini API keys start with "AIzaSy" and are typically 39 chars
+          if (!trimmedKey.startsWith('AIzaSy')) {
+            alert('Warning: API key should start with "AIzaSy". Please check your key.');
+          }
+        }
+        await onStart(dirHandle, trimmedKey);
     } catch (err) {
         console.error("Folder selection cancelled or failed", err);
+        if (err instanceof Error && !err.message.includes('aborted')) {
+          alert(`Error: ${err.message}`);
+        }
     } finally {
         setIsLoading(false);
     }
