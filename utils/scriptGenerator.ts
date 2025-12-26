@@ -1,0 +1,1 @@
+export const generateBatchScript = () => { return ""; };
