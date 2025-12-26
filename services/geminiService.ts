@@ -100,8 +100,8 @@ export const categorizeBatch = async (
       1. Identify the plugin type (e.g. "Pro-Q 3" -> EQ).
       2. Match it to the BEST category from the provided list.
       3. ${useLocalFallback ? 'If unsure, make your best guess.' : 'If completely unsure, return null.'}
-      4. Return JSON: { "PluginName": ["PrimaryCategory", "SecondaryCategory"] }
-      5. Primary Category (Index 0) is mandatory.
+      4. Return JSON: { "PluginName": ["PrimaryCategory"${allowMultiTag ? ', "SecondaryCategory", ...' : ''}] }
+      5. Primary Category (Index 0) is mandatory${allowMultiTag ? '. You may assign multiple relevant categories.' : '. Only assign ONE category per plugin.'}.
     `;
 
     // Retry Logic for Rate Limiting

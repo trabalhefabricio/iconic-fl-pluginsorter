@@ -380,7 +380,20 @@ const App: React.FC = () => {
   const handleRenameCategory = (oldName: string) => {
      const newName = prompt(`Rename category "${oldName}" to:`, oldName);
      if (newName && newName !== oldName && newName.trim() !== '') {
-         const cleanName = newName.trim();
+         // Sanitize category name: remove special characters that could cause issues
+         const cleanName = newName.trim().replace(/[<>:"\/\\|?*\x00-\x1F]/g, '');
+         
+         if (cleanName === '') {
+            addLog('Invalid category name: contains only special characters', 'error');
+            return;
+         }
+         
+         // Check for duplicate category names
+         if (categories.some(c => c.toLowerCase() === cleanName.toLowerCase() && c !== oldName)) {
+            addLog('Category name already exists', 'error');
+            return;
+         }
+         
          setCategories(prev => prev.map(c => c === oldName ? cleanName : c));
          setPlugins(prev => prev.map(p => {
              if (p.tags.includes(oldName)) {
