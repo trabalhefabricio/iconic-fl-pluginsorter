@@ -213,7 +213,7 @@ ipcMain.handle('create-directory', async (event, dirPath) => {
 
 ipcMain.handle('delete-directory', async (event, dirPath) => {
   try {
-    await fs.promises.rmdir(dirPath, { recursive: true });
+    await fs.promises.rm(dirPath, { recursive: true, force: true });
     return { success: true };
   } catch (error) {
     throw error;
