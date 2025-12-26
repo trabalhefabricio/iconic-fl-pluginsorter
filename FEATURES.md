@@ -2,6 +2,44 @@
 
 This document provides an in-depth analysis of each feature in ICONIC FL Studio Plugin Sorter, explaining the thought process, benefits, and design decisions behind them.
 
+## 📑 Table of Contents
+
+### Core Features
+1. [AI-Powered Categorization (10/10)](#1-ai-powered-categorization-1010)
+2. [Learning System (9.5/10)](#2-learning-system-9510)
+3. [Content-Based Duplicate Detection (9/10)](#3-content-based-duplicate-detection-910)
+4. [Category-Based File Organization (9/10)](#4-category-based-file-organization-910)
+5. [Undo System (8.5/10)](#5-undo-system-8510)
+6. [Dry Run Mode (10/10)](#6-dry-run-mode-1010)
+
+### UI/UX Features
+7. [Grid & List Views (8/10)](#7-grid--list-views-810)
+8. [Multi-Select Operations (9/10)](#8-multi-select-operations-910)
+9. [Drag & Drop Categorization (9.5/10)](#9-drag--drop-categorization-9510)
+10. [Real-Time Search & Filtering (8.5/10)](#10-real-time-search--filtering-8510)
+11. [Inspector Panel (9/10)](#11-inspector-panel-910)
+12. [Context Menu (8/10)](#12-context-menu-810)
+13. [Console / Activity Log (7.5/10)](#13-console--activity-log-7510)
+
+### Advanced Features
+14. [Category Profiles (8/10)](#14-category-profiles-810)
+15. [Flatten Database Feature (9/10)](#15-flatten-database-feature-910)
+16. [Auto-Execute Mode (7/10)](#16-auto-execute-mode-710)
+17. [Multi-Tag / Copy Mode (8/10)](#17-multi-tag--copy-mode-810)
+
+### Security & Privacy
+18. [Local-First Architecture (10/10)](#18-local-first-architecture-1010)
+19. [API Key Management (8/10)](#19-api-key-management-810)
+20. [Electron Security (9/10)](#20-electron-security-910)
+
+### Educational Features
+21. [Interactive Help / Wiki Modal (9/10)](#21-interactive-help--wiki-modal-910)
+22. [Start Screen / Onboarding (8.5/10)](#22-start-screen--onboarding-8510)
+
+### Performance
+23. [Async File Operations (9/10)](#23-async-file-operations-910)
+24. [Memory Management (8/10)](#24-memory-management-810)
+
 ---
 
 ## 📊 Overall Rating: 9.2/10
