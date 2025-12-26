@@ -17,6 +17,8 @@
 ICONIC is a powerful desktop and web application designed to help music producers organize their FL Studio plugin databases. Using Google's Gemini AI, it intelligently categorizes your plugins, detects duplicates, and provides a clean, intuitive interface for managing thousands of plugins efficiently.
 
 > 📖 **[Read the complete Feature Analysis & Design Rationale](./FEATURES.md)** to understand the thought process behind each feature and see detailed ratings.
+> 
+> 💡 **[View Improvement Recommendations](./IMPROVEMENTS.md)** for future enhancements and feature ideas.
 
 ### ✨ Key Features
 
@@ -291,6 +293,20 @@ ICONIC has been thoughtfully designed with each feature serving a specific purpo
 4. **Privacy Focused**: All file operations happen locally, no cloud storage
 
 📖 **[Read the complete 24-feature analysis with detailed rationale](./FEATURES.md)**
+
+## 💡 Future Improvements
+
+We've identified 35+ potential enhancements to make ICONIC even better! Check out our comprehensive improvement roadmap covering:
+
+- **Design**: Category color coding, theme variants, enhanced visual hierarchy
+- **UI/UX**: Plugin preview modal, advanced search, keyboard shortcuts, bulk operations
+- **Features**: Multi-level undo, smart duplicate resolution, export/import, usage tracking
+- **Performance**: Virtual scrolling, web workers, progressive loading
+- **Creative**: Animated transitions, achievement system, AI recommendations
+
+📋 **[View the complete improvement plan with priorities and implementation guides](./IMPROVEMENTS.md)**
+
+Contributions implementing any of these improvements are highly welcome!
 
 ## 🙏 Acknowledgments
 
