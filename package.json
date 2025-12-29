@@ -49,8 +49,7 @@
           ]
         }
       ],
-      "icon": "assets/icon.png",
-      "compression": "maximum"
+      "icon": "assets/icon.png"
     },
     "mac": {
       "target": [
