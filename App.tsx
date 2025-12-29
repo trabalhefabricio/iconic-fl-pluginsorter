@@ -68,7 +68,8 @@ const App: React.FC = () => {
     autoExecute: false,
     deduplicate: true,
     multiTag: true,
-    dryRun: false 
+    dryRun: false,
+    downloadImages: false
   });
 
   // --- Initialization ---

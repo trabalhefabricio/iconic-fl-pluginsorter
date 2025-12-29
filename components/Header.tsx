@@ -2,6 +2,7 @@
 import React from 'react';
 import { Play, LayoutGrid, List as ListIcon, FolderSync, FolderEdit, Square, ArrowDownAZ, ArrowUpAZ, Calendar, CalendarClock, Filter, ZoomIn } from 'lucide-react';
 import { ViewMode, SortOption, StatusFilter } from '../types';
+import TokenMonitorDisplay from './TokenMonitorDisplay';
 
 interface HeaderProps {
   pluginCount: number;
@@ -143,6 +144,9 @@ const Header: React.FC<HeaderProps> = ({
 
       {/* Right Actions */}
       <div className="flex items-center gap-3">
+        {/* Token Monitor - Compact View */}
+        <TokenMonitorDisplay compact className="hidden lg:flex" />
+        
         <div className="flex items-center gap-2 text-xs text-slate-500 font-mono mr-2 hidden xl:flex">
              <span className="truncate max-w-[150px]" title={selectedFolder}>{selectedFolder}</span>
              <button onClick={onChangeFolder} className="p-1 hover:bg-slate-800 rounded text-slate-400">

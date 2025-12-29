@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { Zap, Shield, Brain, Tag, Edit2, FileType, Check, X, AlertTriangle, Users, HardDrive, Key, Wrench, FolderMinus, Image as ImageIcon, FileText, Trash2, Copy, Layers } from 'lucide-react';
+import { Zap, Shield, Brain, Tag, Edit2, FileType, Check, X, AlertTriangle, Users, HardDrive, Key, Wrench, FolderMinus, Image as ImageIcon, FileText, Trash2, Copy, Layers, Download } from 'lucide-react';
 import { AppSettings, Plugin, LearnedRule } from '../types';
+import TokenMonitorDisplay from './TokenMonitorDisplay';
 
 interface InspectorProps {
   selectedPlugins: Plugin[];
@@ -326,7 +327,7 @@ const Inspector: React.FC<InspectorProps> = ({ selectedPlugins, settings, update
         
         <div>
            <SectionHeader icon={<Key className="w-3 h-3" />} title="API Configuration" colorClass="text-slate-300" />
-           <div className="bg-slate-900 rounded-lg p-3 border border-slate-800">
+           <div className="bg-slate-900 rounded-lg p-3 border border-slate-800 mb-4">
                <label className="text-[10px] text-slate-500 uppercase font-bold mb-1 block">Gemini API Key</label>
                <input 
                   type="password" 
@@ -338,6 +339,9 @@ const Inspector: React.FC<InspectorProps> = ({ selectedPlugins, settings, update
                />
                <p className="text-[10px] text-slate-600 mt-2">Updates immediately. Key is not saved to disk.</p>
            </div>
+           
+           {/* Token Monitor */}
+           <TokenMonitorDisplay />
         </div>
 
         <div>
@@ -355,6 +359,13 @@ const Inspector: React.FC<InspectorProps> = ({ selectedPlugins, settings, update
               description={settings.multiTag ? "Copy plugins to multiple category folders" : "Move to single best category only"}
               checked={settings.multiTag} 
               onChange={(v) => updateSetting('multiTag', v)} 
+            />
+            <div className="border-t border-slate-800 my-1"></div>
+            <Toggle 
+              label="Download Images" 
+              description="Search & download plugin screenshots (uses AI tokens)"
+              checked={settings.downloadImages} 
+              onChange={(v) => updateSetting('downloadImages', v)} 
             />
           </div>
         </div>

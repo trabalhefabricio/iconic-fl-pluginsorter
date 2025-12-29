@@ -30,6 +30,7 @@ export interface AppSettings {
   deduplicate: boolean; // Content-based deduplication
   multiTag: boolean; // If true, copy to multiple folders.
   dryRun: boolean; // Visual simulation only
+  downloadImages: boolean; // Auto-download missing plugin screenshots
 }
 
 export interface LogEntry {
