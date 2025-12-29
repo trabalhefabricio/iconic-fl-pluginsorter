@@ -32,12 +32,21 @@
       "electron.cjs",
       "preload.cjs",
       "assets/**/*",
-      "package.json"
+      "package.json",
+      "!**/.DS_Store",
+      "!**/node_modules/**/*"
     ],
+    "asar": true,
+    "compression": "maximum",
+    "removePackageScripts": true,
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "assets/icon.png"
     },
