@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { tokenMonitor } from "./tokenMonitor";
 
 let aiClient: GoogleGenAI | null = null;
 
@@ -63,6 +64,11 @@ export const suggestCategories = async (
       }
     });
     
+    // Track token usage
+    const promptTokens = tokenMonitor.estimateTokens(prompt);
+    const completionTokens = tokenMonitor.estimateTokens(response.text || "");
+    tokenMonitor.recordUsage(promptTokens, completionTokens);
+    
     const json = JSON.parse(cleanJson(response.text || "{}"));
     return json.categories || currentCategories;
   } catch (error) {
@@ -117,6 +123,11 @@ export const categorizeBatch = async (
                 responseMimeType: "application/json",
               }
             });
+        
+            // Track token usage
+            const promptTokens = tokenMonitor.estimateTokens(prompt);
+            const completionTokens = tokenMonitor.estimateTokens(response.text || "");
+            tokenMonitor.recordUsage(promptTokens, completionTokens);
         
             const rawText = cleanJson(response.text || "{}");
             let result;

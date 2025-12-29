@@ -3,7 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "description": "AI-powered FL Studio plugin organizer",
-  "author": "trabalhefabricio",
+  "author": {
+    "name": "trabalhefabricio",
+    "email": "trabalhefabricio@users.noreply.github.com"
+  },
   "main": "electron.cjs",
   "type": "module",
   "scripts": {

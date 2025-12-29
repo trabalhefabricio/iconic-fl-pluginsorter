@@ -7,6 +7,7 @@
 **An intelligent, AI-powered tool to organize, categorize, and manage your FL Studio plugin database**
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/trabalhefabricio/iconic-fl-pluginsorter)
+[![Build Status](https://github.com/trabalhefabricio/iconic-fl-pluginsorter/actions/workflows/build.yml/badge.svg)](https://github.com/trabalhefabricio/iconic-fl-pluginsorter/actions/workflows/build.yml)
 [![Built with React](https://img.shields.io/badge/Built%20with-React-61DAFB?logo=react)](https://reactjs.org/)
 [![Powered by Gemini AI](https://img.shields.io/badge/Powered%20by-Gemini%20AI-4285F4?logo=google)](https://ai.google.dev/)
 
