@@ -7,10 +7,16 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build-web:
     name: Build Web App
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -38,6 +44,9 @@ jobs:
   build-electron:
     name: Build Electron App - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    
+    permissions:
+      contents: read
     
     strategy:
       matrix:
@@ -86,6 +95,9 @@ jobs:
   lint-and-typecheck:
     name: Lint and Type Check
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
