@@ -42,24 +42,11 @@ jobs:
           retention-days: 7
 
   build-electron:
-    name: Build Electron App - ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Build Electron App - Windows
+    runs-on: windows-latest
     
     permissions:
       contents: read
-    
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            platform: linux
-            build-command: build:electron:linux
-          - os: windows-latest
-            platform: windows
-            build-command: build:electron:win
-          - os: macos-latest
-            platform: macos
-            build-command: build:electron:mac
     
     steps:
       - name: Checkout code
@@ -74,23 +61,32 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Build Electron app for ${{ matrix.platform }}
-        run: npm run ${{ matrix.build-command }}
+      - name: Build Electron app for Windows
+        run: npm run build:electron:win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Upload Electron artifacts - ${{ matrix.platform }}
+      - name: Verify build artifacts exist
+        run: |
+          if (!(Test-Path "release\*.exe")) {
+            Write-Error "Build failed: No .exe files found in release directory"
+            exit 1
+          }
+          Write-Host "Build successful: Found .exe files"
+          Get-ChildItem release\*.exe | ForEach-Object { 
+            $sizeMB = [math]::Round($_.Length / 1MB, 2)
+            Write-Host "$($_.Name): $sizeMB MB"
+          }
+        shell: pwsh
+      
+      - name: Upload Electron artifacts - Windows
         uses: actions/upload-artifact@v4
         with:
-          name: electron-${{ matrix.platform }}
+          name: electron-windows
           path: |
             release/*.exe
-            release/*.dmg
-            release/*.zip
-            release/*.AppImage
-            release/*.deb
           retention-days: 7
-          if-no-files-found: warn
+          if-no-files-found: error
 
   lint-and-typecheck:
     name: Lint and Type Check
