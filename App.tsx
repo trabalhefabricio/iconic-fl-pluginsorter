@@ -172,8 +172,8 @@ const App: React.FC = () => {
             }
         }
 
-        setPlugins(currentPlugins);
-        resolveDuplicates(currentPlugins);
+        const resolvedPlugins = resolveDuplicates(currentPlugins);
+        setPlugins(resolvedPlugins);
 
         if (!key) addLog('Running in Manual Mode (AI features disabled)', 'warning');
     } catch (err) {
@@ -190,7 +190,7 @@ const App: React.FC = () => {
         .toLowerCase();
   };
 
-  const resolveDuplicates = async (currentPlugins: Plugin[]) => {
+  const resolveDuplicates = (currentPlugins: Plugin[]): Plugin[] => {
       addLog('Resolving duplicates (Best Content + Best Name)...', 'info');
       
       const updates: { id: string, isDuplicate: boolean, newName?: string }[] = [];
@@ -249,7 +249,7 @@ const App: React.FC = () => {
       });
       groupAndProcess(byIdentity, 'Identity');
 
-      setPlugins(prev => prev.map(p => {
+      return currentPlugins.map(p => {
           const update = updates.find(u => u.id === p.id);
           if (update) {
               return { 
@@ -259,7 +259,7 @@ const App: React.FC = () => {
               };
           }
           return p;
-      }));
+      });
   };
 
   const processScanResults = (files: any[]) => {
@@ -635,10 +635,10 @@ const App: React.FC = () => {
         const hashedPlugins = await fileSystemService.generateHashes(parsedPlugins, (curr, total) => {
             setProgress({ current: curr, total, label: 'Re-hashing' });
         });
-        setPlugins(hashedPlugins);
+        const resolvedPlugins = resolveDuplicates(hashedPlugins);
+        setPlugins(resolvedPlugins);
         setProgress(undefined);
         
-        resolveDuplicates(hashedPlugins);
 
     } catch (e) {
         addLog(`Critical Error: ${e}`, 'error');
@@ -665,8 +665,8 @@ const App: React.FC = () => {
           setLeftovers(parsedLeftovers);
           
           const hashedPlugins = await fileSystemService.generateHashes(parsedPlugins, () => {});
-          setPlugins(hashedPlugins);
-          resolveDuplicates(hashedPlugins);
+          const resolvedPlugins = resolveDuplicates(hashedPlugins);
+          setPlugins(resolvedPlugins);
       } catch (e) {
           addLog(`Revert Failed: ${e}`, 'error');
       }
@@ -696,8 +696,8 @@ const App: React.FC = () => {
           setLeftovers(parsedLeftovers);
           
           const hashedPlugins = await fileSystemService.generateHashes(parsedPlugins, () => {});
-          setPlugins(hashedPlugins);
-          resolveDuplicates(hashedPlugins);
+          const resolvedPlugins = resolveDuplicates(hashedPlugins);
+          setPlugins(resolvedPlugins);
 
       } catch(e) {
           addLog(`Flatten failed: ${e}`, 'error');
