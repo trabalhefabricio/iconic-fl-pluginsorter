@@ -477,6 +477,7 @@ const App: React.FC = () => {
     setPlugins(prev => prev.map(p => {
         if (targetIds.has(p.id) && !p.isDuplicate) {
             const norm = normalizeName(p.name);
+            if (!norm) return p; // Guard against empty normalized name
             const rule = manualOverrides[norm];
             if (rule && rule.count >= MEMORY_THRESHOLD && rule.tags.length > 0) {
                 memoryHitCount++;
