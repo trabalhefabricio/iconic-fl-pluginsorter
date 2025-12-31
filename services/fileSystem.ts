@@ -45,14 +45,17 @@ async function getUniqueFilename(dirHandle: any, filename: string): Promise<stri
         // If we are here, file exists. Logic to increment.
         const parts = filename.split('.');
         const ext = parts.pop() || '';
-        const base = parts.join('.') || filename;
+        const base = parts.length > 0 ? parts.join('.') : (ext ? '' : filename);
+        
+        // If no base name (e.g., ".gitignore"), use a default base
+        const baseName = base || 'file';
         
         let counter = 2;
         const MAX_ITERATIONS = 1000; // Loop Guard
 
         while (counter < MAX_ITERATIONS) {
             // FL uses _2, _3 style
-            const newName = ext ? `${base}_${counter}.${ext}` : `${base}_${counter}`;
+            const newName = ext ? `${baseName}_${counter}.${ext}` : `${baseName}_${counter}`;
             try {
                 await dirHandle.getFileHandle(newName);
                 counter++;
@@ -61,7 +64,7 @@ async function getUniqueFilename(dirHandle: any, filename: string): Promise<stri
             }
         }
         // Fallback if folder is absurdly full
-        return ext ? `${base}_${Date.now()}.${ext}` : `${base}_${Date.now()}`;
+        return ext ? `${baseName}_${Date.now()}.${ext}` : `${baseName}_${Date.now()}`;
 
     } catch (e) {
         return filename; // Doesn't exist, safe to use

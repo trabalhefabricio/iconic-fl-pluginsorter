@@ -106,7 +106,7 @@ const App: React.FC = () => {
 
   const addLog = useCallback((message: string, type: LogEntry['type'] = 'info') => {
     const entry: LogEntry = {
-      id: Math.random().toString(36).substring(2, 11),
+      id: Math.random().toString(36).substring(2, 9),
       timestamp: new Date().toLocaleTimeString([], { hour12: false }),
       message,
       type
