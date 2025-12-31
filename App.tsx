@@ -327,7 +327,7 @@ const App: React.FC = () => {
 
   const learnOverride = (pluginName: string, tags: string[]) => {
       const norm = normalizeName(pluginName);
-      if (!norm) return;
+      if (!norm || tags.length === 0) return; // Guard against empty tags
 
       setManualOverrides(prev => {
           const existing = prev[norm];
@@ -478,7 +478,7 @@ const App: React.FC = () => {
         if (targetIds.has(p.id) && !p.isDuplicate) {
             const norm = normalizeName(p.name);
             const rule = manualOverrides[norm];
-            if (rule && rule.count >= MEMORY_THRESHOLD) {
+            if (rule && rule.count >= MEMORY_THRESHOLD && rule.tags.length > 0) {
                 memoryHitCount++;
                 const tags = rule.tags;
                 return { ...p, tags: tags, category: tags[0], status: 'categorized' };
