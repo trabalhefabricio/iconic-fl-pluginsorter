@@ -800,7 +800,8 @@ const App: React.FC = () => {
       return matchesSearch && matchesCategory;
     });
 
-    return list.sort((a, b) => {
+    // Create a copy before sorting to avoid mutating filtered array
+    return [...list].sort((a, b) => {
         switch (sortOption) {
             case 'name_asc': return a.name.localeCompare(b.name);
             case 'name_desc': return b.name.localeCompare(a.name);
