@@ -44,15 +44,15 @@ async function getUniqueFilename(dirHandle: any, filename: string): Promise<stri
         await dirHandle.getFileHandle(filename);
         // If we are here, file exists. Logic to increment.
         const parts = filename.split('.');
-        const ext = parts.pop();
-        const base = parts.join('.');
+        const ext = parts.pop() || '';
+        const base = parts.join('.') || filename;
         
         let counter = 2;
         const MAX_ITERATIONS = 1000; // Loop Guard
 
         while (counter < MAX_ITERATIONS) {
             // FL uses _2, _3 style
-            const newName = `${base}_${counter}.${ext}`;
+            const newName = ext ? `${base}_${counter}.${ext}` : `${base}_${counter}`;
             try {
                 await dirHandle.getFileHandle(newName);
                 counter++;
@@ -61,7 +61,7 @@ async function getUniqueFilename(dirHandle: any, filename: string): Promise<stri
             }
         }
         // Fallback if folder is absurdly full
-        return `${base}_${Date.now()}.${ext}`;
+        return ext ? `${base}_${Date.now()}.${ext}` : `${base}_${Date.now()}`;
 
     } catch (e) {
         return filename; // Doesn't exist, safe to use
