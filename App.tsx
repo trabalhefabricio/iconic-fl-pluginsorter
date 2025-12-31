@@ -106,7 +106,7 @@ const App: React.FC = () => {
 
   const addLog = useCallback((message: string, type: LogEntry['type'] = 'info') => {
     const entry: LogEntry = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).substring(2, 11),
       timestamp: new Date().toLocaleTimeString([], { hour12: false }),
       message,
       type
@@ -271,8 +271,10 @@ const App: React.FC = () => {
           if (file.kind !== 'file') return;
           const name = file.name;
           const ext = name.split('.').pop()?.toLowerCase();
-          const baseName = name.substring(0, name.lastIndexOf('.'));
-          const relativeDir = file.path.substring(0, file.path.lastIndexOf('/'));
+          const dotIndex = name.lastIndexOf('.');
+          const baseName = dotIndex > 0 ? name.substring(0, dotIndex) : name;
+          const slashIndex = file.path.lastIndexOf('/');
+          const relativeDir = slashIndex >= 0 ? file.path.substring(0, slashIndex) : '';
           const key = `${relativeDir}/${baseName}`;
 
           if (ext === 'fst') {

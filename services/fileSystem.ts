@@ -309,8 +309,9 @@ export const fileSystemService = {
                              const assetHandle = await p.parentHandle.getFileHandle(asset.filename);
                              const assetFile = await assetHandle.getFile();
                              
-                             const assetExt = asset.filename.split('.').pop();
-                             const baseTarget = targetFilename.substring(0, targetFilename.lastIndexOf('.'));
+                             const assetExt = asset.filename.split('.').pop() || 'png';
+                             const dotIndex = targetFilename.lastIndexOf('.');
+                             const baseTarget = dotIndex > 0 ? targetFilename.substring(0, dotIndex) : targetFilename;
                              const targetAssetName = `${baseTarget}.${assetExt}`;
 
                              const newAssetHandle = await rootHandle.getFileHandle(targetAssetName, { create: true });
@@ -440,8 +441,9 @@ export const fileSystemService = {
                                  const assetHandle = await p.parentHandle.getFileHandle(asset.filename);
                                  const assetFile = await assetHandle.getFile();
                                  
-                                 const assetExt = asset.filename.split('.').pop();
-                                 const baseTarget = targetFilename.substring(0, targetFilename.lastIndexOf('.'));
+                                 const assetExt = asset.filename.split('.').pop() || 'png';
+                                 const dotIndex = targetFilename.lastIndexOf('.');
+                                 const baseTarget = dotIndex > 0 ? targetFilename.substring(0, dotIndex) : targetFilename;
                                  const targetAssetName = `${baseTarget}.${assetExt}`;
 
                                  const newAssetHandle = await destDir.getFileHandle(targetAssetName, { create: true });
