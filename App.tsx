@@ -106,7 +106,7 @@ const App: React.FC = () => {
 
   const addLog = useCallback((message: string, type: LogEntry['type'] = 'info') => {
     const entry: LogEntry = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).substring(2, 9),
       timestamp: new Date().toLocaleTimeString([], { hour12: false }),
       message,
       type
@@ -172,8 +172,8 @@ const App: React.FC = () => {
             }
         }
 
-        setPlugins(currentPlugins);
-        resolveDuplicates(currentPlugins);
+        const resolvedPlugins = resolveDuplicates(currentPlugins);
+        setPlugins(resolvedPlugins);
 
         if (!key) addLog('Running in Manual Mode (AI features disabled)', 'warning');
     } catch (err) {
@@ -190,7 +190,7 @@ const App: React.FC = () => {
         .toLowerCase();
   };
 
-  const resolveDuplicates = async (currentPlugins: Plugin[]) => {
+  const resolveDuplicates = (currentPlugins: Plugin[]): Plugin[] => {
       addLog('Resolving duplicates (Best Content + Best Name)...', 'info');
       
       const updates: { id: string, isDuplicate: boolean, newName?: string }[] = [];
@@ -249,7 +249,7 @@ const App: React.FC = () => {
       });
       groupAndProcess(byIdentity, 'Identity');
 
-      setPlugins(prev => prev.map(p => {
+      return currentPlugins.map(p => {
           const update = updates.find(u => u.id === p.id);
           if (update) {
               return { 
@@ -259,7 +259,7 @@ const App: React.FC = () => {
               };
           }
           return p;
-      }));
+      });
   };
 
   const processScanResults = (files: any[]) => {
@@ -271,8 +271,10 @@ const App: React.FC = () => {
           if (file.kind !== 'file') return;
           const name = file.name;
           const ext = name.split('.').pop()?.toLowerCase();
-          const baseName = name.substring(0, name.lastIndexOf('.'));
-          const relativeDir = file.path.substring(0, file.path.lastIndexOf('/'));
+          const dotIndex = name.lastIndexOf('.');
+          const baseName = dotIndex > 0 ? name.substring(0, dotIndex) : name;
+          const slashIndex = file.path.lastIndexOf('/');
+          const relativeDir = slashIndex >= 0 ? file.path.substring(0, slashIndex) : '';
           const key = `${relativeDir}/${baseName}`;
 
           if (ext === 'fst') {
@@ -325,7 +327,7 @@ const App: React.FC = () => {
 
   const learnOverride = (pluginName: string, tags: string[]) => {
       const norm = normalizeName(pluginName);
-      if (!norm) return;
+      if (!norm || tags.length === 0) return; // Guard against empty tags
 
       setManualOverrides(prev => {
           const existing = prev[norm];
@@ -475,8 +477,9 @@ const App: React.FC = () => {
     setPlugins(prev => prev.map(p => {
         if (targetIds.has(p.id) && !p.isDuplicate) {
             const norm = normalizeName(p.name);
+            if (!norm) return p; // Guard against empty normalized name
             const rule = manualOverrides[norm];
-            if (rule && rule.count >= MEMORY_THRESHOLD) {
+            if (rule && rule.count >= MEMORY_THRESHOLD && rule.tags.length > 0) {
                 memoryHitCount++;
                 const tags = rule.tags;
                 return { ...p, tags: tags, category: tags[0], status: 'categorized' };
@@ -633,10 +636,10 @@ const App: React.FC = () => {
         const hashedPlugins = await fileSystemService.generateHashes(parsedPlugins, (curr, total) => {
             setProgress({ current: curr, total, label: 'Re-hashing' });
         });
-        setPlugins(hashedPlugins);
+        const resolvedPlugins = resolveDuplicates(hashedPlugins);
+        setPlugins(resolvedPlugins);
         setProgress(undefined);
         
-        resolveDuplicates(hashedPlugins);
 
     } catch (e) {
         addLog(`Critical Error: ${e}`, 'error');
@@ -663,8 +666,8 @@ const App: React.FC = () => {
           setLeftovers(parsedLeftovers);
           
           const hashedPlugins = await fileSystemService.generateHashes(parsedPlugins, () => {});
-          setPlugins(hashedPlugins);
-          resolveDuplicates(hashedPlugins);
+          const resolvedPlugins = resolveDuplicates(hashedPlugins);
+          setPlugins(resolvedPlugins);
       } catch (e) {
           addLog(`Revert Failed: ${e}`, 'error');
       }
@@ -694,8 +697,8 @@ const App: React.FC = () => {
           setLeftovers(parsedLeftovers);
           
           const hashedPlugins = await fileSystemService.generateHashes(parsedPlugins, () => {});
-          setPlugins(hashedPlugins);
-          resolveDuplicates(hashedPlugins);
+          const resolvedPlugins = resolveDuplicates(hashedPlugins);
+          setPlugins(resolvedPlugins);
 
       } catch(e) {
           addLog(`Flatten failed: ${e}`, 'error');
@@ -797,7 +800,8 @@ const App: React.FC = () => {
       return matchesSearch && matchesCategory;
     });
 
-    return list.sort((a, b) => {
+    // Create a copy before sorting to avoid mutating filtered array
+    return [...list].sort((a, b) => {
         switch (sortOption) {
             case 'name_asc': return a.name.localeCompare(b.name);
             case 'name_desc': return b.name.localeCompare(a.name);

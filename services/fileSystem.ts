@@ -44,15 +44,18 @@ async function getUniqueFilename(dirHandle: any, filename: string): Promise<stri
         await dirHandle.getFileHandle(filename);
         // If we are here, file exists. Logic to increment.
         const parts = filename.split('.');
-        const ext = parts.pop();
-        const base = parts.join('.');
+        const ext = parts.pop() || '';
+        const base = parts.length > 0 ? parts.join('.') : (ext ? '' : filename);
+        
+        // If no base name (e.g., ".gitignore"), use a default base
+        const baseName = base || 'file';
         
         let counter = 2;
         const MAX_ITERATIONS = 1000; // Loop Guard
 
         while (counter < MAX_ITERATIONS) {
             // FL uses _2, _3 style
-            const newName = `${base}_${counter}.${ext}`;
+            const newName = ext ? `${baseName}_${counter}.${ext}` : `${baseName}_${counter}`;
             try {
                 await dirHandle.getFileHandle(newName);
                 counter++;
@@ -61,7 +64,7 @@ async function getUniqueFilename(dirHandle: any, filename: string): Promise<stri
             }
         }
         // Fallback if folder is absurdly full
-        return `${base}_${Date.now()}.${ext}`;
+        return ext ? `${baseName}_${Date.now()}.${ext}` : `${baseName}_${Date.now()}`;
 
     } catch (e) {
         return filename; // Doesn't exist, safe to use
@@ -309,8 +312,9 @@ export const fileSystemService = {
                              const assetHandle = await p.parentHandle.getFileHandle(asset.filename);
                              const assetFile = await assetHandle.getFile();
                              
-                             const assetExt = asset.filename.split('.').pop();
-                             const baseTarget = targetFilename.substring(0, targetFilename.lastIndexOf('.'));
+                             const assetExt = asset.filename.split('.').pop() || 'png';
+                             const dotIndex = targetFilename.lastIndexOf('.');
+                             const baseTarget = dotIndex > 0 ? targetFilename.substring(0, dotIndex) : targetFilename;
                              const targetAssetName = `${baseTarget}.${assetExt}`;
 
                              const newAssetHandle = await rootHandle.getFileHandle(targetAssetName, { create: true });
@@ -440,8 +444,9 @@ export const fileSystemService = {
                                  const assetHandle = await p.parentHandle.getFileHandle(asset.filename);
                                  const assetFile = await assetHandle.getFile();
                                  
-                                 const assetExt = asset.filename.split('.').pop();
-                                 const baseTarget = targetFilename.substring(0, targetFilename.lastIndexOf('.'));
+                                 const assetExt = asset.filename.split('.').pop() || 'png';
+                                 const dotIndex = targetFilename.lastIndexOf('.');
+                                 const baseTarget = dotIndex > 0 ? targetFilename.substring(0, dotIndex) : targetFilename;
                                  const targetAssetName = `${baseTarget}.${assetExt}`;
 
                                  const newAssetHandle = await destDir.getFileHandle(targetAssetName, { create: true });

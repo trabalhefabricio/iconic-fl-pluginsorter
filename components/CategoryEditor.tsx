@@ -43,7 +43,8 @@ const CategoryEditor: React.FC<CategoryEditorProps> = ({
     
     // Remove duplicates (case-insensitive)
     const unique = Array.from(new Set(lines.map(l => l.toLowerCase())))
-      .map(lower => lines.find(l => l.toLowerCase() === lower)!);
+      .map(lower => lines.find(l => l.toLowerCase() === lower))
+      .filter((line): line is string => line !== undefined);
     
     if (unique.length === 0) {
       alert('Please add at least one category');

@@ -100,7 +100,7 @@ const TokenMonitorDisplay: React.FC<TokenMonitorDisplayProps> = ({ className = '
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-500">Avg. tokens/request</span>
               <span className="text-slate-300 font-medium">
-                {Math.round(stats.totalTokens / stats.requestCount).toLocaleString()}
+                {stats.requestCount > 0 ? Math.round(stats.totalTokens / stats.requestCount).toLocaleString() : '0'}
               </span>
             </div>
           </div>
