@@ -26,6 +26,8 @@ async function ensureDirectory(root: any, path: string) {
 // We don't need cryptographic security, just collision resistance for dedupe.
 async function calculateQuickHash(fileHandle: any, size: number): Promise<string> {
     try {
+        if (size === 0) return 'empty';
+        
         let buffer: ArrayBuffer;
         
         if (isElectronHandle(fileHandle)) {
@@ -35,7 +37,6 @@ async function calculateQuickHash(fileHandle: any, size: number): Promise<string
             buffer = fullBuffer.slice(0, Math.min(4096, fullBuffer.byteLength));
         } else {
             const file = await fileHandle.getFile();
-            if (size === 0) return 'empty';
             
             // Read first 4KB
             const chunk = file.slice(0, 4096);
