@@ -75,6 +75,16 @@ export interface LearnedRule {
     count: number; // Confidence score
 }
 
+export interface ConflictSuggestion {
+    id: string;
+    pluginName: string;
+    normalizedName: string;
+    currentTags: string[];
+    suggestedTags: string[];
+    conflictCount: number;
+    timestamp: number;
+}
+
 export interface PersistedState {
     timestamp: number;
     categories: string[];

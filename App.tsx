@@ -9,6 +9,7 @@ import StartScreen from './components/StartScreen';
 import CategoryEditor from './components/CategoryEditor';
 import WikiModal from './components/WikiModal';
 import ContextMenu from './components/ContextMenu';
+import ConflictSuggestionModal from './components/ConflictSuggestionModal';
 
 import { 
   Plugin, 
@@ -19,7 +20,8 @@ import {
   PersistedState,
   SortOption,
   LearnedRule,
-  StatusFilter
+  StatusFilter,
+  ConflictSuggestion
 } from './types';
 import { DEFAULT_CATEGORIES } from './constants';
 import { categorizeBatch, initializeGemini } from './services/geminiService';
@@ -48,6 +50,9 @@ const App: React.FC = () => {
   
   // Context Menu State
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; plugin: Plugin } | null>(null);
+
+  // Conflict Suggestion State
+  const [conflictSuggestion, setConflictSuggestion] = useState<ConflictSuggestion | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
@@ -334,8 +339,39 @@ const App: React.FC = () => {
           const tagsMatch = existing && existing.tags.slice().sort().join(',') === tags.slice().sort().join(',');
           
           if (tagsMatch) {
-              return { ...prev, [norm]: { tags, count: existing.count + 1 } };
+              // Same tags, increment count
+              const newCount = existing.count + 1;
+              
+              // Check if we should show a suggestion (after 3 consistent uses)
+              if (newCount === 3 && !conflictSuggestion) {
+                  setConflictSuggestion({
+                      id: `${norm}-${Date.now()}`,
+                      pluginName: pluginName,
+                      normalizedName: norm,
+                      currentTags: existing.tags,
+                      suggestedTags: tags,
+                      conflictCount: newCount,
+                      timestamp: Date.now()
+                  });
+                  addLog(`💡 AI suggestion available for "${pluginName}"`, 'info');
+              }
+              
+              return { ...prev, [norm]: { tags, count: newCount } };
           } else {
+              // Different tags - potential conflict detected
+              if (existing && existing.count >= 2) {
+                  // User is changing their mind after establishing a pattern
+                  setConflictSuggestion({
+                      id: `${norm}-${Date.now()}`,
+                      pluginName: pluginName,
+                      normalizedName: norm,
+                      currentTags: existing.tags,
+                      suggestedTags: tags,
+                      conflictCount: existing.count,
+                      timestamp: Date.now()
+                  });
+                  addLog(`💡 Categorization conflict detected for "${pluginName}"`, 'warning');
+              }
               return { ...prev, [norm]: { tags, count: 1 } };
           }
       });
@@ -348,6 +384,35 @@ const App: React.FC = () => {
           return next;
       });
       addLog(`Forgot rule for "${normalizedName}"`, 'info');
+  };
+
+  const handleAcceptSuggestion = () => {
+      if (!conflictSuggestion) return;
+      
+      // Set a high confidence score to always use this categorization
+      setManualOverrides(prev => ({
+          ...prev,
+          [conflictSuggestion.normalizedName]: {
+              tags: conflictSuggestion.suggestedTags,
+              count: 10 // High confidence - will always be applied
+          }
+      }));
+      
+      addLog(`✓ Always using "${conflictSuggestion.suggestedTags[0]}" for "${conflictSuggestion.pluginName}"`, 'success');
+      setConflictSuggestion(null);
+  };
+
+  const handleRejectSuggestion = () => {
+      if (!conflictSuggestion) return;
+      
+      // Keep the current learning process, just dismiss the suggestion
+      addLog(`Continuing to learn categorization for "${conflictSuggestion.pluginName}"`, 'info');
+      setConflictSuggestion(null);
+  };
+
+  const handleCloseSuggestion = () => {
+      // Just close without action - will ask again later if pattern continues
+      setConflictSuggestion(null);
   };
 
   const handleUpdatePlugin = (id: string, updates: Partial<Plugin>) => {
@@ -903,6 +968,15 @@ const App: React.FC = () => {
         isOpen={isWikiOpen}
         onClose={() => setIsWikiOpen(false)}
       />
+
+      {conflictSuggestion && (
+          <ConflictSuggestionModal 
+            suggestion={conflictSuggestion}
+            onAccept={handleAcceptSuggestion}
+            onReject={handleRejectSuggestion}
+            onClose={handleCloseSuggestion}
+          />
+      )}
 
       {contextMenu && (
           <ContextMenu 

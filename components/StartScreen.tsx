@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { FolderOpen, Key, AlertTriangle, ShieldCheck, Loader2 } from 'lucide-react';
 import { Plugin } from '../types';
+import { unifiedFileSystem } from '../services/electronAdapter';
 
 interface StartScreenProps {
   onStart: (handle: any, apiKey: string) => void;
@@ -15,9 +16,21 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
   const handleSelectFolder = async () => {
     try {
         setIsLoading(true);
-        const dirHandle = await (window as any).showDirectoryPicker({
-            mode: 'readwrite'
-        });
+        
+        // Check if running in Electron environment
+        const isElectron = typeof window !== 'undefined' && (window as any).electron?.isElectron;
+        
+        let dirHandle;
+        if (isElectron) {
+          // Use unified file system for Electron
+          dirHandle = await unifiedFileSystem.showDirectoryPicker();
+        } else {
+          // Use browser File System Access API
+          dirHandle = await (window as any).showDirectoryPicker({
+              mode: 'readwrite'
+          });
+        }
+        
         // Validate API key format if provided
         const trimmedKey = apiKey.trim();
         if (trimmedKey && !isManual) {
@@ -29,7 +42,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
         await onStart(dirHandle, trimmedKey);
     } catch (err) {
         console.error("Folder selection cancelled or failed", err);
-        if (err instanceof Error && !err.message.includes('aborted')) {
+        if (err instanceof Error && !err.message.includes('aborted') && !err.message.includes('cancelled')) {
           alert(`Error: ${err.message}`);
         }
     } finally {

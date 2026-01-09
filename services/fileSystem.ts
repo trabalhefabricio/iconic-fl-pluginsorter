@@ -1,8 +1,18 @@
 
 import { Plugin, AppSettings, LeftoverFile, UndoManifest } from '../types';
+import { unifiedFileSystem, UnifiedFileHandle } from './electronAdapter';
+
+// Helper to check if handle is from Electron
+function isElectronHandle(handle: any): boolean {
+    return handle && handle.type === 'electron';
+}
 
 // Helper to get a file handle from a directory handle by path
 async function ensureDirectory(root: any, path: string) {
+    if (isElectronHandle(root)) {
+        return await unifiedFileSystem.ensureDirectory(root, path);
+    }
+    
     const parts = path.split('/');
     let dir = root;
     for (const part of parts) {
@@ -16,12 +26,23 @@ async function ensureDirectory(root: any, path: string) {
 // We don't need cryptographic security, just collision resistance for dedupe.
 async function calculateQuickHash(fileHandle: any, size: number): Promise<string> {
     try {
-        const file = await fileHandle.getFile();
         if (size === 0) return 'empty';
         
-        // Read first 4KB
-        const chunk = file.slice(0, 4096);
-        const buffer = await chunk.arrayBuffer();
+        let buffer: ArrayBuffer;
+        
+        if (isElectronHandle(fileHandle)) {
+            const result = await unifiedFileSystem.readFile(fileHandle);
+            // Only read first 4KB for hash
+            const fullBuffer = result.buffer;
+            buffer = fullBuffer.slice(0, Math.min(4096, fullBuffer.byteLength));
+        } else {
+            const file = await fileHandle.getFile();
+            
+            // Read first 4KB
+            const chunk = file.slice(0, 4096);
+            buffer = await chunk.arrayBuffer();
+        }
+        
         const view = new Uint8Array(buffer);
         
         // Simple DJB2 hash for the chunk
@@ -41,7 +62,12 @@ async function calculateQuickHash(fileHandle: any, size: number): Promise<string
 // Find a unique name: "Serum.fst" -> "Serum_2.fst" (FL Studio Style)
 async function getUniqueFilename(dirHandle: any, filename: string): Promise<string> {
     try {
-        await dirHandle.getFileHandle(filename);
+        const exists = isElectronHandle(dirHandle) 
+            ? await unifiedFileSystem.fileExists(dirHandle, filename)
+            : await dirHandle.getFileHandle(filename).then(() => true).catch(() => false);
+        
+        if (!exists) return filename;
+        
         // If we are here, file exists. Logic to increment.
         const parts = filename.split('.');
         const ext = parts.pop() || '';
@@ -56,12 +82,15 @@ async function getUniqueFilename(dirHandle: any, filename: string): Promise<stri
         while (counter < MAX_ITERATIONS) {
             // FL uses _2, _3 style
             const newName = ext ? `${baseName}_${counter}.${ext}` : `${baseName}_${counter}`;
-            try {
-                await dirHandle.getFileHandle(newName);
-                counter++;
-            } catch (e) {
+            
+            const exists = isElectronHandle(dirHandle)
+                ? await unifiedFileSystem.fileExists(dirHandle, newName)
+                : await dirHandle.getFileHandle(newName).then(() => true).catch(() => false);
+            
+            if (!exists) {
                 return newName; // Found one that doesn't exist
             }
+            counter++;
         }
         // Fallback if folder is absurdly full
         return ext ? `${baseName}_${Date.now()}.${ext}` : `${baseName}_${Date.now()}`;
@@ -75,15 +104,22 @@ export const fileSystemService = {
     // A recursive scanner that returns a flat list of ALL files first
     async scanAllFiles(dirHandle: any, path = '', parentHandle: any = null): Promise<{ path: string, handle: any, kind: 'file' | 'directory', parent: any, name: string }[]> {
         const files: any[] = [];
-        // Guard against too much recursion or massive folders
+        
         try {
-            for await (const entry of dirHandle.values()) {
-                const entryPath = path ? `${path}/${entry.name}` : entry.name;
-                if (entry.kind === 'file') {
-                    files.push({ path: entryPath, handle: entry, kind: 'file', parent: dirHandle, name: entry.name });
-                } else if (entry.kind === 'directory') {
-                    const subFiles = await this.scanAllFiles(entry, entryPath, entry);
-                    files.push(...subFiles);
+            if (isElectronHandle(dirHandle)) {
+                // Use unified file system for Electron
+                const entries = await unifiedFileSystem.scanDirectory(dirHandle, path);
+                return entries;
+            } else {
+                // Use browser File System Access API
+                for await (const entry of dirHandle.values()) {
+                    const entryPath = path ? `${path}/${entry.name}` : entry.name;
+                    if (entry.kind === 'file') {
+                        files.push({ path: entryPath, handle: entry, kind: 'file', parent: dirHandle, name: entry.name });
+                    } else if (entry.kind === 'directory') {
+                        const subFiles = await this.scanAllFiles(entry, entryPath, entry);
+                        files.push(...subFiles);
+                    }
                 }
             }
         } catch (e) {
