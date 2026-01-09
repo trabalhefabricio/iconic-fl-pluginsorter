@@ -40,7 +40,6 @@
       ],
       "icon": "assets/icon.png",
       "artifactName": "${productName}-${version}-${arch}.${ext}",
-      "publisherName": "ICONIC",
       "verifyUpdateCodeSignature": false
     },
     "mac": {
