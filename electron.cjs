@@ -20,10 +20,22 @@ const createWindow = () => {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.cjs')
+      preload: path.join(__dirname, 'preload.cjs'),
+      // Windows-specific optimizations
+      spellcheck: false,
+      enableRemoteModule: false
     },
     icon: path.join(__dirname, 'assets', 'icon.png'),
-    title: 'ICONIC - FL Plugin Sorter AI'
+    title: 'ICONIC - FL Plugin Sorter AI',
+    // Windows-specific: Better window appearance
+    frame: true,
+    autoHideMenuBar: false,
+    show: false // Show only when ready
+  });
+
+  // Show window when ready to prevent white flash
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
   });
 
   // Load the app
